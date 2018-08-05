@@ -9,7 +9,7 @@ $proxies_array = array();
 if (ob_get_level() == 0) ob_start();
 
 //function to scrape proxy page
-function scrape_nova_proxy()
+function scrape_proxy_nova()
 {
     // create HTML DOM
     $html = file_get_html('https://www.proxynova.com/proxy-server-list/country-us/');
@@ -55,11 +55,11 @@ function run_scrape(){
     //only scrape the proxy site once per run
     if($first_run == 1 || $exhausted_array == 1)
     {
-        echo 'Scraping Nova Proxy...';
+        echo 'Scraping ProxyNova...';
         ob_flush();
         flush();
         //scrape the nova proxy site
-        $proxies_array = scrape_nova_proxy();
+        $proxies_array = scrape_proxy_nova();
         echo 'done.<br />';
         ob_flush();
         flush();
@@ -88,7 +88,7 @@ function run_scrape(){
     //execute curl command
     $ch = curl_init();
     // set URL
-    curl_setopt($ch, CURLOPT_URL, "https://api.weather.gov/zones/forecast/KYZ049/forecast");
+    curl_setopt($ch, CURLOPT_URL, "https://example.com");
     // set proxy connection
     curl_setopt($ch, CURLOPT_PROXY, $proxy_string);
     // http request timeout 10 seconds
@@ -101,7 +101,7 @@ function run_scrape(){
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     //ignore ssl cert errors
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    // Do not outputting it out directly on screen.
+    // return the file contents in the exec command.
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     // download the file
     $file = curl_exec($ch);
@@ -119,13 +119,14 @@ while (true)
     global $exhausted_array;
     global $random_number;
     $file_scrape = run_scrape();
-    if (strpos($file_scrape, 'forbidden') !== false || $file_scrape == null || $file_scrape == '') {
+    if (strpos($file_scrape, 'forbidden') !== false || $file_scrape == null || $file_scrape == '')
+    {
         echo 'Curl could not download the file using this proxy. <span style="color: red; font-weight: bold">Retrying</span>...<br />';
         echo $file_scrape;
         echo 'Removing proxy from list...';
         unset($proxies_array[$random_number]);
         echo 'done.<br />';
-        if(count($proxies_array==0))
+        if (count($proxies_array) == 0)
         {
             $exhausted_array = 1;
             echo 'No more servers left, re-scraping Nova...<br />';
